@@ -1,0 +1,6 @@
+assemble
+move
+polish
+put-down
+standing
+turn-right

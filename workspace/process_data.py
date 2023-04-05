@@ -215,9 +215,11 @@ def concat_pkl():
             context = pk.load(f)
         
         keypoints = context['keypoint']
-        keypoints = keypoints[:, :, :-4, :]
         scores = context['keypoint_score']
-        scores = scores[:, :, :-4]
+        
+        # 忽略后四个关节，这是身体的下半部分
+        # keypoints = keypoints[:, :, :-4, :]
+        # scores = scores[:, :, :-4]
         
         context['keypoint'] = keypoints
         context['keypoint_score'] = scores   
@@ -227,16 +229,16 @@ def concat_pkl():
     dataset['split'] = {'xsub_train': split}
     dataset['annotations'] = annotations
     
-    with open(r'workspace/data/factory6.pkl', 'wb') as f:
+    with open(r'workspace/data/factory6_coco.pkl', 'wb') as f:
         pk.dump(dataset, f)
     
 
 if __name__ == '__main__':
     
-    context = read_pickle(filename='workspace/data/factory6.pkl')
+    context = read_pickle(filename='workspace/data/factory6_coco.pkl')
     # select_classes()
     # rename_label_index()
     # calc_uncertainty()
     # verify_error()
     # rescore_keypoints()
-    concat_pkl()
+    # concat_pkl()

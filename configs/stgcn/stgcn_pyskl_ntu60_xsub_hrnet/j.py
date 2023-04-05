@@ -10,7 +10,7 @@ dataset_type = 'PoseDataset'
 # ann_file = '/workspaces/pyskl/workspace/data/ntu60_hrnet.pkl'
 # ann_file = 'workspace/data/ntu60_hrnet_select.pkl'
 # ann_file = 'workspace/data/nuaa6.pkl'
-ann_file = 'workspace/data/factory6.pkl'
+ann_file = 'workspace/data/factory6_coco.pkl'
 
 train_pipeline = [
     dict(type='PreNormalize2D'),
@@ -62,4 +62,4 @@ log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 
 # runtime settings
 log_level = 'INFO'
-work_dir = './work_dirs/stgcn/stgcn_pyskl_factory/j'
+work_dir = './work_dirs/stgcn/stgcn_pyskl_factory/coco'

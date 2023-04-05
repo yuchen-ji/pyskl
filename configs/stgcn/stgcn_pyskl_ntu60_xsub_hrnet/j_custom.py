@@ -1,3 +1,4 @@
+# 使用不同的骨骼结构进行训练，只包含身体上半部分
 model = dict(
     type='RecognizerGCN',
     backbone=dict(
