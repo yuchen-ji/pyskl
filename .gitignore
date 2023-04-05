@@ -53,7 +53,6 @@ coverage.xml
 *.pot
 
 # Django stuff:
-*.log
 local_settings.py
 db.sqlite3
 
@@ -103,7 +102,6 @@ venv.bak/
 .idea
 *.pkl
 *.pkl.json
-*.log.json
 benchlist.txt
 work_dirs/
 .cache/
@@ -133,3 +131,15 @@ examples/extract_diving48_skeleton/*pkl
 configs/gen_config.ipynb
 dev.ipynb
 test.ipynb
+
+# custom
+*.jpg
+*.png
+*.mp4
+*.zip
+# *.log
+# *.log.json
+ !**/all_uncertainty.pkl
+ !**/true_uncertainty.pkl
+ !**/false_uncertainty.pkl
+examples/extract_diving48_skeleton/*gz

@@ -177,7 +177,7 @@ def inference_recognizer(model, video, outputs=None, as_tensor=True, **kwargs):
     score_tuples = tuple(zip(range(num_classes), scores))
     score_sorted = sorted(score_tuples, key=itemgetter(1), reverse=True)
 
-    top5_label = score_sorted[:5]
+    top5_label = score_sorted[:6]
     if outputs:
         return top5_label, returned_features
     return top5_label

@@ -39,6 +39,8 @@ class Compose:
 
         for t in self.transforms:
             data = t(data)
+            # print("==============================")
+            # print(f"data: {data['keypoint'].shape}")
             if data is None:
                 return None
         return data

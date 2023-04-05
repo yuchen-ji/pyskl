@@ -83,7 +83,7 @@ class Graph:
         self.nx_node = nx_node
 
         assert nx_node == 1 or mode == 'random', "nx_node can be > 1 only if mode is 'random'"
-        assert layout in ['openpose', 'nturgb+d', 'coco']
+        assert layout in ['openpose', 'nturgb+d', 'coco', 'custom']
 
         self.get_layout(layout)
         self.hop_dis = get_hop_distance(self.num_node, self.inward, max_hop)
@@ -121,6 +121,15 @@ class Graph:
                 (1, 0), (3, 1), (2, 0), (4, 2)
             ]
             self.center = 0
+        elif layout == 'custom':
+            self.num_node = 13
+            self.inward = [
+                # (0, 1), (0, 2), (0, 6), (0, 5), (1, 3), (2, 4),
+                # (5, 6), (5, 7), (5, 11), (6, 8), (6, 12), (7, 9), (8, 10), (11, 12)
+                (11, 5), (12, 6), (9, 7), (7, 5), (10, 8), (8, 6), (5, 0), (6, 0),
+                (1, 0), (3, 1), (2, 0), (4, 2)
+            ]
+            self.center = 0
         else:
             raise ValueError(f'Do Not Exist This Layout: {layout}')
         self.self_link = [(i, i) for i in range(self.num_node)]
@@ -141,6 +150,7 @@ class Graph:
             for i in range(self.num_node):
                 for j in range(self.num_node):
                     if hop_dis[j, i] == hop:
+                        # 说明 vertex(i) 相比于 vertex(j) 更靠近中心点，所以归为 close 类
                         if hop_dis[j, center] >= hop_dis[i, center]:
                             a_close[j, i] = normalize_adj[j, i]
                         else:

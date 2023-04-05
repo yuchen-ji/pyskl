@@ -361,6 +361,7 @@ class GenSkeFeat:
             assert results['keypoint'].shape[-1] == 2, 'Only 2D keypoints have keypoint_score. '
             keypoint = results.pop('keypoint')
             keypoint_score = results.pop('keypoint_score')
+            # print(f"keypoint_score: {keypoint_score.shape}")
             results['keypoint'] = np.concatenate([keypoint, keypoint_score[..., None]], -1)
         return self.ops(results)
 

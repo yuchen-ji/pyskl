@@ -12,6 +12,11 @@ from scipy.optimize import linear_sum_assignment
 
 from pyskl.apis import inference_recognizer, init_recognizer
 
+import time
+import copy
+import pickle
+from operator import itemgetter
+
 try:
     from mmdet.apis import inference_detector, init_detector
 except (ImportError, ModuleNotFoundError):
@@ -50,23 +55,28 @@ except ImportError:
 
 FONTFACE = cv2.FONT_HERSHEY_DUPLEX
 FONTSCALE = 0.75
-FONTCOLOR = (255, 255, 255)  # BGR, white
-THICKNESS = 1
+FONTCOLOR = (228, 28, 33)  # BGR, white
+THICKNESS = 2
 LINETYPE = 1
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='PoseC3D demo')
-    parser.add_argument('video', help='video file/url')
-    parser.add_argument('out_filename', help='output filename')
+    # parser.add_argument('--video', default='workspace/demo/videos/output.mp4', help='video file/url')
+    parser.add_argument('--video', default='workspace/demo/input.mp4', help='video file/url')
+    
+    parser.add_argument('--out_filename', default='workspace/demo/input_result.mp4', help='output filename')
     parser.add_argument(
         '--config',
-        default='configs/posec3d/slowonly_r50_ntu120_xsub/joint.py',
+        # default='configs/posec3d/slowonly_r50_ntu120_xsub/joint.py',
+        default='configs/stgcn/stgcn_pyskl_ntu60_xsub_hrnet/j_custom.py',
         help='skeleton action recognition config file path')
     parser.add_argument(
         '--checkpoint',
-        default=('https://download.openmmlab.com/mmaction/pyskl/ckpt/'
-                 'posec3d/slowonly_r50_ntu120_xsub/joint.pth'),
+        # default=('https://download.openmmlab.com/mmaction/pyskl/ckpt/'
+                #  'posec3d/slowonly_r50_ntu120_xsub/joint.pth'),
+        # default='work_dirs/stgcn/stgcn_pyskl_nuaa6/j_4/epoch_16.pth',
+        default='work_dirs/stgcn/stgcn_pyskl_factory/jj/epoch_16.pth',
         help='skeleton action recognition checkpoint file/url')
     parser.add_argument(
         '--det-config',
@@ -94,10 +104,11 @@ def parse_args():
         help='the threshold of human detection score')
     parser.add_argument(
         '--label-map',
-        default='tools/data/label_map/nturgbd_120.txt',
+        # default='tools/data/label_map/nturgbd_120.txt',
+        default='workspace/label_map/nuaa6.txt',
         help='label map file')
     parser.add_argument(
-        '--device', type=str, default='cuda:0', help='CPU/CUDA device option')
+        '--device', type=str, default='cuda:1', help='CPU/CUDA device option')
     parser.add_argument(
         '--short-side',
         type=int,
@@ -267,8 +278,15 @@ def main():
         # We will keep at most `GCN_nperson` persons per frame.
         tracking_inputs = [[pose['keypoints'] for pose in poses] for poses in pose_results]
         keypoint, keypoint_score = pose_tracking(tracking_inputs, max_tracks=GCN_nperson)
-        fake_anno['keypoint'] = keypoint
-        fake_anno['keypoint_score'] = keypoint_score
+        # By Yuchen, 23.03.12, 用于将keypoint_score都设为1
+        keypoint = keypoint[:,:,:-4,:]
+        keypoint_score = keypoint_score[:,:,:-4]
+        # keypoint_score = 0.8 * np.ones_like(keypoint_score[:,:,:-4])
+        if True:
+            fake_list = slide_window(fake_anno, keypoint, keypoint_score)
+        else:       
+            fake_anno['keypoint'] = keypoint
+            fake_anno['keypoint_score'] = keypoint_score
     else:
         num_person = max([len(x) for x in pose_results])
         # Current PoseC3D models are trained on COCO-keypoints (17 keypoints)
@@ -285,26 +303,75 @@ def main():
         fake_anno['keypoint'] = keypoint
         fake_anno['keypoint_score'] = keypoint_score
 
-    results = inference_recognizer(model, fake_anno)
+    # test inference FPS
+    # warmup = 10
+    # iters = 10
+    # for i in range(warmup + iters):
+    #     data = copy.deepcopy(fake_anno)
+    #     if i == warmup:
+    #         start = time.time()
+    #     results = inference_recognizer(model, data)
+    # end = time.time()
+    
+    # print("======= Inference results =====")
+    # print(f"Inference time: {(end - start) / iters}")
+    # print(f"Inference FPS: {iters / (end - start)}")
+    
+    # real-time inference
+    predictions = []
+    label_list = []
+    for idx, item in enumerate(fake_list):
+        data = copy.deepcopy(item)
+        results = inference_recognizer(model, data)
+        action_label = label_map[results[0][0]]
+        # label_list.append(f"{action_label}: {round(results[0][1],2)}")
+        label_list.append(f"{action_label}")
+        print(f"{action_label}: {results[0][1]}")
+        
+        tmp = sorted(results, key=itemgetter(0))
+        tmp = np.array(tmp)
+        tmp = tmp[:,1]
+        predictions.append(tmp)
+   
+    label_list[0:0] = [label_list[0] for i in range(num_frame - len(label_list))]
+    # 存储实时预测的结果
+    # with open(r'workspace/results/real_time/result_4.pkl', 'wb') as f:
+    #     pickle.dump(predictions, f)
 
-    action_label = label_map[results[0][0]]
+    # results = inference_recognizer(model, fake_anno)
+    # print(results)
+    # action_label = label_map[results[0][0]]
 
-    pose_model = init_pose_model(args.pose_config, args.pose_checkpoint,
-                                 args.device)
+    pose_model = init_pose_model(args.pose_config, args.pose_checkpoint, args.device)
     vis_frames = [
-        vis_pose_result(pose_model, frame_paths[i], pose_results[i])
+        vis_pose_result(pose_model, frame_paths[i], pose_results[i], dataset='CustomDataset')
+        # vis_pose_result(pose_model, frame_paths[i], pose_results[i])
         for i in range(num_frame)
     ]
-    for frame in vis_frames:
-        cv2.putText(frame, action_label, (10, 30), FONTFACE, FONTSCALE,
+    for item in range(len(vis_frames)):
+        cv2.putText(vis_frames[item], label_list[item], (150, 67), FONTFACE, FONTSCALE,
                     FONTCOLOR, THICKNESS, LINETYPE)
 
-    vid = mpy.ImageSequenceClip([x[:, :, ::-1] for x in vis_frames], fps=24)
+    vid = mpy.ImageSequenceClip([x[:, :, ::-1] for x in vis_frames], fps=30)
     vid.write_videofile(args.out_filename, remove_temp=True)
 
     tmp_frame_dir = osp.dirname(frame_paths[0])
     shutil.rmtree(tmp_frame_dir)
 
+
+def slide_window(fake_anno, keypoint, keypoints_score):
+    start_frame = 50
+    iter_frames = 1
+    fake_list = []
+    for item in range(start_frame, len(keypoint[0]), iter_frames):
+        anno = copy.deepcopy(fake_anno)
+        anno['total_frames'] = start_frame
+        anno['keypoint'] = copy.deepcopy(keypoint[:,item-start_frame:item])
+        anno['keypoint_score'] = copy.deepcopy(keypoints_score[:,item-start_frame:item])
+        fake_list.append(anno)
+    
+    return fake_list
+    
 
 if __name__ == '__main__':
     main()
