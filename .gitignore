@@ -103,7 +103,6 @@ venv.bak/
 *.pkl
 *.pkl.json
 benchlist.txt
-work_dirs/
 .cache/
 
 # Pytorch
@@ -143,3 +142,4 @@ test.ipynb
 !**/true_uncertainty.pkl
 !**/false_uncertainty.pkl
 examples/extract_diving48_skeleton/*gz
+# work_dirs/

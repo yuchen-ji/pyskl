@@ -1,0 +1,334 @@
+2023-03-18 15:48:42,238 - pyskl - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.7.15 (default, Nov 24 2022, 21:12:53) [GCC 11.2.0]
+CUDA available: True
+GPU 0,1,2,3,4,5,6: NVIDIA TITAN RTX
+CUDA_HOME: /usr/local/cuda
+NVCC: Cuda compilation tools, release 11.0, V11.0.221
+GCC: gcc (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0
+PyTorch: 1.10.0
+PyTorch compiling details: PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2021.4-Product Build 20210904 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.2.3 (Git Hash 7336ca9f055cf1bfa13efb658fe15dc9b41f0740)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX512
+  - CUDA Runtime 10.2
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 7.6.5
+  - Magma 2.5.2
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=10.2, CUDNN_VERSION=7.6.5, CXX_COMPILER=/opt/rh/devtoolset-7/root/usr/bin/c++, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.10.0, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, 
+
+TorchVision: 0.11.0
+OpenCV: 4.6.0
+MMCV: 1.5.0
+MMCV Compiler: GCC 7.3
+MMCV CUDA Compiler: 10.2
+pyskl: 0.1.0+bd46e96
+------------------------------------------------------------
+
+2023-03-18 15:48:42,603 - pyskl - INFO - Config: model = dict(
+    type='RecognizerGCN',
+    backbone=dict(
+        type='STGCN', graph_cfg=dict(layout='custom', mode='stgcn_spatial')),
+    cls_head=dict(type='GCNHead', num_classes=6, in_channels=256))
+dataset_type = 'PoseDataset'
+ann_file = 'workspace/data/factory6.pkl'
+train_pipeline = [
+    dict(type='PreNormalize2D'),
+    dict(type='GenSkeFeat', dataset='custom', feats=['j']),
+    dict(type='UniformSample', clip_len=100, seed=200),
+    dict(type='PoseDecode'),
+    dict(type='FormatGCNInput', num_person=1),
+    dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
+    dict(type='ToTensor', keys=['keypoint'])
+]
+val_pipeline = [
+    dict(type='PreNormalize2D'),
+    dict(type='GenSkeFeat', dataset='custom', feats=['j']),
+    dict(type='UniformSample', clip_len=100, num_clips=1),
+    dict(type='PoseDecode'),
+    dict(type='FormatGCNInput', num_person=1),
+    dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
+    dict(type='ToTensor', keys=['keypoint'])
+]
+test_pipeline = [
+    dict(type='PreNormalize2D'),
+    dict(type='GenSkeFeat', dataset='custom', feats=['j']),
+    dict(type='UniformSample', clip_len=100, num_clips=10, seed=2),
+    dict(type='PoseDecode'),
+    dict(type='FormatGCNInput', num_person=1),
+    dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
+    dict(type='ToTensor', keys=['keypoint'])
+]
+data = dict(
+    videos_per_gpu=16,
+    workers_per_gpu=2,
+    test_dataloader=dict(videos_per_gpu=1),
+    train=dict(
+        type='RepeatDataset',
+        times=5,
+        dataset=dict(
+            type='PoseDataset',
+            ann_file='workspace/data/factory6.pkl',
+            pipeline=[
+                dict(type='PreNormalize2D'),
+                dict(type='GenSkeFeat', dataset='custom', feats=['j']),
+                dict(type='UniformSample', clip_len=100, seed=200),
+                dict(type='PoseDecode'),
+                dict(type='FormatGCNInput', num_person=1),
+                dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
+                dict(type='ToTensor', keys=['keypoint'])
+            ],
+            split='xsub_train')),
+    val=dict(
+        type='PoseDataset',
+        ann_file='workspace/data/factory6.pkl',
+        pipeline=[
+            dict(type='PreNormalize2D'),
+            dict(type='GenSkeFeat', dataset='custom', feats=['j']),
+            dict(type='UniformSample', clip_len=100, num_clips=1),
+            dict(type='PoseDecode'),
+            dict(type='FormatGCNInput', num_person=1),
+            dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
+            dict(type='ToTensor', keys=['keypoint'])
+        ],
+        split='xsub_val'),
+    test=dict(
+        type='PoseDataset',
+        ann_file='workspace/data/factory6.pkl',
+        pipeline=[
+            dict(type='PreNormalize2D'),
+            dict(type='GenSkeFeat', dataset='custom', feats=['j']),
+            dict(type='UniformSample', clip_len=100, num_clips=10, seed=2),
+            dict(type='PoseDecode'),
+            dict(type='FormatGCNInput', num_person=1),
+            dict(type='Collect', keys=['keypoint', 'label'], meta_keys=[]),
+            dict(type='ToTensor', keys=['keypoint'])
+        ],
+        split='xsub_val'))
+optimizer = dict(
+    type='SGD', lr=0.05, momentum=0.9, weight_decay=0.0005, nesterov=True)
+optimizer_config = dict(grad_clip=None)
+lr_config = dict(policy='CosineAnnealing', min_lr=0, by_epoch=False)
+total_epochs = 16
+checkpoint_config = dict(interval=1)
+evaluation = dict(interval=1, metrics=['top_k_accuracy'])
+log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
+log_level = 'INFO'
+work_dir = './work_dirs/stgcn/stgcn_pyskl_factory/jj'
+dist_params = dict(backend='nccl')
+gpu_ids = range(0, 4)
+
+2023-03-18 15:48:45,561 - pyskl - INFO - Set random seed to 1350152049, deterministic: False
+2023-03-18 15:48:45,728 - pyskl - INFO - 6000 videos remain after valid thresholding
+2023-03-18 15:48:46,221 - pyskl - INFO - Start running, host: root@518b9ea961fb, work_dir: /workspaces/pyskl/work_dirs/stgcn/stgcn_pyskl_factory/jj
+2023-03-18 15:48:46,222 - pyskl - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) CosineAnnealingLrUpdaterHook       
+(NORMAL      ) CheckpointHook                     
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) CosineAnnealingLrUpdaterHook       
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) CosineAnnealingLrUpdaterHook       
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+2023-03-18 15:48:46,222 - pyskl - INFO - workflow: [('train', 1)], max: 16 epochs
+2023-03-18 15:48:46,222 - pyskl - INFO - Checkpoints will be saved to /workspaces/pyskl/work_dirs/stgcn/stgcn_pyskl_factory/jj by HardDiskBackend.
+2023-03-18 15:49:01,072 - pyskl - INFO - Epoch [1][50/469]	lr: 4.999e-02, eta: 0:36:50, time: 0.297, data_time: 0.202, memory: 2707, top1_acc: 0.7275, top5_acc: 0.9831, loss_cls: 0.7468, loss: 0.7468
+2023-03-18 15:49:05,317 - pyskl - INFO - Epoch [1][100/469]	lr: 4.998e-02, eta: 0:23:31, time: 0.085, data_time: 0.001, memory: 2707, top1_acc: 0.9800, top5_acc: 1.0000, loss_cls: 0.0620, loss: 0.0620
+2023-03-18 15:49:09,587 - pyskl - INFO - Epoch [1][150/469]	lr: 4.995e-02, eta: 0:19:04, time: 0.085, data_time: 0.001, memory: 2707, top1_acc: 0.9894, top5_acc: 1.0000, loss_cls: 0.0381, loss: 0.0381
+2023-03-18 15:49:13,855 - pyskl - INFO - Epoch [1][200/469]	lr: 4.991e-02, eta: 0:16:48, time: 0.085, data_time: 0.001, memory: 2707, top1_acc: 0.9903, top5_acc: 1.0000, loss_cls: 0.0351, loss: 0.0351
+2023-03-18 15:49:18,127 - pyskl - INFO - Epoch [1][250/469]	lr: 4.986e-02, eta: 0:15:25, time: 0.085, data_time: 0.001, memory: 2707, top1_acc: 0.9947, top5_acc: 1.0000, loss_cls: 0.0243, loss: 0.0243
+2023-03-18 15:49:22,382 - pyskl - INFO - Epoch [1][300/469]	lr: 4.980e-02, eta: 0:14:28, time: 0.085, data_time: 0.001, memory: 2707, top1_acc: 0.9944, top5_acc: 1.0000, loss_cls: 0.0146, loss: 0.0146
+2023-03-18 15:49:26,689 - pyskl - INFO - Epoch [1][350/469]	lr: 4.973e-02, eta: 0:13:46, time: 0.086, data_time: 0.000, memory: 2707, top1_acc: 0.9978, top5_acc: 1.0000, loss_cls: 0.0074, loss: 0.0074
+2023-03-18 15:49:30,982 - pyskl - INFO - Epoch [1][400/469]	lr: 4.965e-02, eta: 0:13:14, time: 0.086, data_time: 0.000, memory: 2707, top1_acc: 0.9984, top5_acc: 1.0000, loss_cls: 0.0105, loss: 0.0105
+2023-03-18 15:49:35,255 - pyskl - INFO - Epoch [1][450/469]	lr: 4.956e-02, eta: 0:12:48, time: 0.085, data_time: 0.001, memory: 2707, top1_acc: 0.9912, top5_acc: 1.0000, loss_cls: 0.0307, loss: 0.0307
+2023-03-18 15:49:37,712 - pyskl - INFO - Saving checkpoint at 1 epochs
+2023-03-18 15:49:52,352 - pyskl - INFO - Epoch [2][50/469]	lr: 4.941e-02, eta: 0:14:14, time: 0.290, data_time: 0.205, memory: 2707, top1_acc: 0.9966, top5_acc: 1.0000, loss_cls: 0.0108, loss: 0.0108
+2023-03-18 15:49:56,632 - pyskl - INFO - Epoch [2][100/469]	lr: 4.930e-02, eta: 0:13:46, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9994, top5_acc: 1.0000, loss_cls: 0.0034, loss: 0.0034
+2023-03-18 15:50:00,895 - pyskl - INFO - Epoch [2][150/469]	lr: 4.917e-02, eta: 0:13:21, time: 0.085, data_time: 0.001, memory: 2707, top1_acc: 0.9969, top5_acc: 1.0000, loss_cls: 0.0096, loss: 0.0096
+2023-03-18 15:50:05,182 - pyskl - INFO - Epoch [2][200/469]	lr: 4.903e-02, eta: 0:12:59, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9984, top5_acc: 1.0000, loss_cls: 0.0063, loss: 0.0063
+2023-03-18 15:50:09,467 - pyskl - INFO - Epoch [2][250/469]	lr: 4.888e-02, eta: 0:12:40, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9994, top5_acc: 1.0000, loss_cls: 0.0028, loss: 0.0028
+2023-03-18 15:50:13,749 - pyskl - INFO - Epoch [2][300/469]	lr: 4.872e-02, eta: 0:12:23, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9994, top5_acc: 1.0000, loss_cls: 0.0029, loss: 0.0029
+2023-03-18 15:50:18,038 - pyskl - INFO - Epoch [2][350/469]	lr: 4.855e-02, eta: 0:12:08, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0018, loss: 0.0018
+2023-03-18 15:50:22,325 - pyskl - INFO - Epoch [2][400/469]	lr: 4.837e-02, eta: 0:11:53, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0018, loss: 0.0018
+2023-03-18 15:50:26,618 - pyskl - INFO - Epoch [2][450/469]	lr: 4.818e-02, eta: 0:11:40, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9981, top5_acc: 1.0000, loss_cls: 0.0077, loss: 0.0077
+2023-03-18 15:50:28,974 - pyskl - INFO - Saving checkpoint at 2 epochs
+2023-03-18 15:50:43,346 - pyskl - INFO - Epoch [3][50/469]	lr: 4.790e-02, eta: 0:12:18, time: 0.285, data_time: 0.195, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 15:50:47,605 - pyskl - INFO - Epoch [3][100/469]	lr: 4.768e-02, eta: 0:12:04, time: 0.085, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 15:50:51,861 - pyskl - INFO - Epoch [3][150/469]	lr: 4.746e-02, eta: 0:11:50, time: 0.085, data_time: 0.001, memory: 2707, top1_acc: 0.9988, top5_acc: 1.0000, loss_cls: 0.0034, loss: 0.0034
+2023-03-18 15:50:56,131 - pyskl - INFO - Epoch [3][200/469]	lr: 4.722e-02, eta: 0:11:38, time: 0.085, data_time: 0.001, memory: 2707, top1_acc: 0.9994, top5_acc: 1.0000, loss_cls: 0.0031, loss: 0.0031
+2023-03-18 15:51:00,407 - pyskl - INFO - Epoch [3][250/469]	lr: 4.698e-02, eta: 0:11:26, time: 0.085, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0025, loss: 0.0025
+2023-03-18 15:51:04,703 - pyskl - INFO - Epoch [3][300/469]	lr: 4.672e-02, eta: 0:11:15, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0010, loss: 0.0010
+2023-03-18 15:51:09,007 - pyskl - INFO - Epoch [3][350/469]	lr: 4.646e-02, eta: 0:11:04, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9981, top5_acc: 1.0000, loss_cls: 0.0067, loss: 0.0067
+2023-03-18 15:51:13,325 - pyskl - INFO - Epoch [3][400/469]	lr: 4.618e-02, eta: 0:10:54, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0016, loss: 0.0016
+2023-03-18 15:51:17,636 - pyskl - INFO - Epoch [3][450/469]	lr: 4.590e-02, eta: 0:10:44, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 15:51:19,984 - pyskl - INFO - Saving checkpoint at 3 epochs
+2023-03-18 15:51:34,536 - pyskl - INFO - Epoch [4][50/469]	lr: 4.550e-02, eta: 0:11:07, time: 0.288, data_time: 0.194, memory: 2707, top1_acc: 0.9978, top5_acc: 1.0000, loss_cls: 0.0056, loss: 0.0056
+2023-03-18 15:51:38,816 - pyskl - INFO - Epoch [4][100/469]	lr: 4.519e-02, eta: 0:10:56, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9972, top5_acc: 1.0000, loss_cls: 0.0129, loss: 0.0129
+2023-03-18 15:51:43,109 - pyskl - INFO - Epoch [4][150/469]	lr: 4.488e-02, eta: 0:10:46, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0029, loss: 0.0029
+2023-03-18 15:51:47,398 - pyskl - INFO - Epoch [4][200/469]	lr: 4.456e-02, eta: 0:10:36, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0021, loss: 0.0021
+2023-03-18 15:51:51,705 - pyskl - INFO - Epoch [4][250/469]	lr: 4.423e-02, eta: 0:10:27, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0018, loss: 0.0018
+2023-03-18 15:51:56,008 - pyskl - INFO - Epoch [4][300/469]	lr: 4.389e-02, eta: 0:10:18, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0012, loss: 0.0012
+2023-03-18 15:52:00,315 - pyskl - INFO - Epoch [4][350/469]	lr: 4.354e-02, eta: 0:10:10, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:52:04,647 - pyskl - INFO - Epoch [4][400/469]	lr: 4.319e-02, eta: 0:10:01, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0003, loss: 0.0003
+2023-03-18 15:52:08,956 - pyskl - INFO - Epoch [4][450/469]	lr: 4.283e-02, eta: 0:09:53, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0003, loss: 0.0003
+2023-03-18 15:52:11,352 - pyskl - INFO - Saving checkpoint at 4 epochs
+2023-03-18 15:52:25,658 - pyskl - INFO - Epoch [5][50/469]	lr: 4.231e-02, eta: 0:10:06, time: 0.283, data_time: 0.192, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0019, loss: 0.0019
+2023-03-18 15:52:29,952 - pyskl - INFO - Epoch [5][100/469]	lr: 4.193e-02, eta: 0:09:57, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9981, top5_acc: 1.0000, loss_cls: 0.0045, loss: 0.0045
+2023-03-18 15:52:34,254 - pyskl - INFO - Epoch [5][150/469]	lr: 4.154e-02, eta: 0:09:49, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9991, top5_acc: 1.0000, loss_cls: 0.0034, loss: 0.0034
+2023-03-18 15:52:38,572 - pyskl - INFO - Epoch [5][200/469]	lr: 4.115e-02, eta: 0:09:41, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0009, loss: 0.0009
+2023-03-18 15:52:42,915 - pyskl - INFO - Epoch [5][250/469]	lr: 4.074e-02, eta: 0:09:33, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0008, loss: 0.0008
+2023-03-18 15:52:47,275 - pyskl - INFO - Epoch [5][300/469]	lr: 4.033e-02, eta: 0:09:25, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0014, loss: 0.0014
+2023-03-18 15:52:51,625 - pyskl - INFO - Epoch [5][350/469]	lr: 3.992e-02, eta: 0:09:17, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 0.9984, top5_acc: 1.0000, loss_cls: 0.0053, loss: 0.0053
+2023-03-18 15:52:56,000 - pyskl - INFO - Epoch [5][400/469]	lr: 3.949e-02, eta: 0:09:10, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0022, loss: 0.0022
+2023-03-18 15:53:00,402 - pyskl - INFO - Epoch [5][450/469]	lr: 3.906e-02, eta: 0:09:03, time: 0.088, data_time: 0.000, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0013, loss: 0.0013
+2023-03-18 15:53:02,775 - pyskl - INFO - Saving checkpoint at 5 epochs
+2023-03-18 15:53:17,292 - pyskl - INFO - Epoch [6][50/469]	lr: 3.846e-02, eta: 0:09:11, time: 0.288, data_time: 0.203, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0007, loss: 0.0007
+2023-03-18 15:53:21,615 - pyskl - INFO - Epoch [6][100/469]	lr: 3.802e-02, eta: 0:09:03, time: 0.086, data_time: 0.001, memory: 2707, top1_acc: 0.9991, top5_acc: 1.0000, loss_cls: 0.0059, loss: 0.0059
+2023-03-18 15:53:25,948 - pyskl - INFO - Epoch [6][150/469]	lr: 3.757e-02, eta: 0:08:56, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0010, loss: 0.0010
+2023-03-18 15:53:30,316 - pyskl - INFO - Epoch [6][200/469]	lr: 3.711e-02, eta: 0:08:49, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0008, loss: 0.0008
+2023-03-18 15:53:34,703 - pyskl - INFO - Epoch [6][250/469]	lr: 3.665e-02, eta: 0:08:41, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 15:53:39,096 - pyskl - INFO - Epoch [6][300/469]	lr: 3.619e-02, eta: 0:08:34, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:53:43,524 - pyskl - INFO - Epoch [6][350/469]	lr: 3.571e-02, eta: 0:08:28, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 15:53:47,958 - pyskl - INFO - Epoch [6][400/469]	lr: 3.524e-02, eta: 0:08:21, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0010, loss: 0.0010
+2023-03-18 15:53:52,406 - pyskl - INFO - Epoch [6][450/469]	lr: 3.476e-02, eta: 0:08:14, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:53:54,812 - pyskl - INFO - Saving checkpoint at 6 epochs
+2023-03-18 15:54:09,147 - pyskl - INFO - Epoch [7][50/469]	lr: 3.409e-02, eta: 0:08:18, time: 0.285, data_time: 0.195, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:54:13,488 - pyskl - INFO - Epoch [7][100/469]	lr: 3.360e-02, eta: 0:08:11, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0019, loss: 0.0019
+2023-03-18 15:54:17,853 - pyskl - INFO - Epoch [7][150/469]	lr: 3.311e-02, eta: 0:08:04, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:54:22,240 - pyskl - INFO - Epoch [7][200/469]	lr: 3.261e-02, eta: 0:07:58, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0010, loss: 0.0010
+2023-03-18 15:54:26,672 - pyskl - INFO - Epoch [7][250/469]	lr: 3.211e-02, eta: 0:07:51, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 0.9994, top5_acc: 1.0000, loss_cls: 0.0044, loss: 0.0044
+2023-03-18 15:54:31,115 - pyskl - INFO - Epoch [7][300/469]	lr: 3.161e-02, eta: 0:07:44, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0011, loss: 0.0011
+2023-03-18 15:54:35,566 - pyskl - INFO - Epoch [7][350/469]	lr: 3.110e-02, eta: 0:07:38, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 0.9994, top5_acc: 1.0000, loss_cls: 0.0016, loss: 0.0016
+2023-03-18 15:54:40,048 - pyskl - INFO - Epoch [7][400/469]	lr: 3.059e-02, eta: 0:07:32, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 15:54:44,539 - pyskl - INFO - Epoch [7][450/469]	lr: 3.008e-02, eta: 0:07:25, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:54:46,986 - pyskl - INFO - Saving checkpoint at 7 epochs
+2023-03-18 15:55:01,726 - pyskl - INFO - Epoch [8][50/469]	lr: 2.937e-02, eta: 0:07:27, time: 0.292, data_time: 0.193, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:55:06,102 - pyskl - INFO - Epoch [8][100/469]	lr: 2.886e-02, eta: 0:07:21, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:55:10,504 - pyskl - INFO - Epoch [8][150/469]	lr: 2.834e-02, eta: 0:07:14, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0008, loss: 0.0008
+2023-03-18 15:55:14,943 - pyskl - INFO - Epoch [8][200/469]	lr: 2.782e-02, eta: 0:07:08, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:55:19,401 - pyskl - INFO - Epoch [8][250/469]	lr: 2.730e-02, eta: 0:07:02, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 15:55:23,894 - pyskl - INFO - Epoch [8][300/469]	lr: 2.678e-02, eta: 0:06:55, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:55:28,377 - pyskl - INFO - Epoch [8][350/469]	lr: 2.626e-02, eta: 0:06:49, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0012, loss: 0.0012
+2023-03-18 15:55:32,883 - pyskl - INFO - Epoch [8][400/469]	lr: 2.573e-02, eta: 0:06:43, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 0.9984, top5_acc: 1.0000, loss_cls: 0.0077, loss: 0.0077
+2023-03-18 15:55:37,401 - pyskl - INFO - Epoch [8][450/469]	lr: 2.521e-02, eta: 0:06:37, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0010, loss: 0.0010
+2023-03-18 15:55:39,890 - pyskl - INFO - Saving checkpoint at 8 epochs
+2023-03-18 15:55:54,762 - pyskl - INFO - Epoch [9][50/469]	lr: 2.449e-02, eta: 0:06:37, time: 0.295, data_time: 0.200, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0007, loss: 0.0007
+2023-03-18 15:55:59,144 - pyskl - INFO - Epoch [9][100/469]	lr: 2.396e-02, eta: 0:06:31, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:56:03,546 - pyskl - INFO - Epoch [9][150/469]	lr: 2.344e-02, eta: 0:06:24, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 0.9994, top5_acc: 1.0000, loss_cls: 0.0018, loss: 0.0018
+2023-03-18 15:56:07,973 - pyskl - INFO - Epoch [9][200/469]	lr: 2.292e-02, eta: 0:06:18, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0012, loss: 0.0012
+2023-03-18 15:56:12,438 - pyskl - INFO - Epoch [9][250/469]	lr: 2.240e-02, eta: 0:06:12, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:56:16,917 - pyskl - INFO - Epoch [9][300/469]	lr: 2.188e-02, eta: 0:06:06, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0012, loss: 0.0012
+2023-03-18 15:56:21,403 - pyskl - INFO - Epoch [9][350/469]	lr: 2.136e-02, eta: 0:06:00, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:56:25,910 - pyskl - INFO - Epoch [9][400/469]	lr: 2.084e-02, eta: 0:05:54, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:56:30,440 - pyskl - INFO - Epoch [9][450/469]	lr: 2.033e-02, eta: 0:05:48, time: 0.091, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:56:32,877 - pyskl - INFO - Saving checkpoint at 9 epochs
+2023-03-18 15:56:47,632 - pyskl - INFO - Epoch [10][50/469]	lr: 1.962e-02, eta: 0:05:47, time: 0.292, data_time: 0.206, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:56:52,012 - pyskl - INFO - Epoch [10][100/469]	lr: 1.911e-02, eta: 0:05:41, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:56:56,430 - pyskl - INFO - Epoch [10][150/469]	lr: 1.860e-02, eta: 0:05:34, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0009, loss: 0.0009
+2023-03-18 15:57:00,855 - pyskl - INFO - Epoch [10][200/469]	lr: 1.810e-02, eta: 0:05:28, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0011, loss: 0.0011
+2023-03-18 15:57:05,307 - pyskl - INFO - Epoch [10][250/469]	lr: 1.760e-02, eta: 0:05:23, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:57:09,769 - pyskl - INFO - Epoch [10][300/469]	lr: 1.710e-02, eta: 0:05:17, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:57:14,255 - pyskl - INFO - Epoch [10][350/469]	lr: 1.660e-02, eta: 0:05:11, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0009, loss: 0.0009
+2023-03-18 15:57:18,745 - pyskl - INFO - Epoch [10][400/469]	lr: 1.611e-02, eta: 0:05:05, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:57:23,263 - pyskl - INFO - Epoch [10][450/469]	lr: 1.563e-02, eta: 0:04:59, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:57:25,865 - pyskl - INFO - Saving checkpoint at 10 epochs
+2023-03-18 15:57:40,802 - pyskl - INFO - Epoch [11][50/469]	lr: 1.496e-02, eta: 0:04:56, time: 0.296, data_time: 0.210, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:57:45,192 - pyskl - INFO - Epoch [11][100/469]	lr: 1.448e-02, eta: 0:04:50, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0003, loss: 0.0003
+2023-03-18 15:57:49,614 - pyskl - INFO - Epoch [11][150/469]	lr: 1.401e-02, eta: 0:04:44, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 15:57:54,064 - pyskl - INFO - Epoch [11][200/469]	lr: 1.354e-02, eta: 0:04:39, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 15:57:58,547 - pyskl - INFO - Epoch [11][250/469]	lr: 1.308e-02, eta: 0:04:33, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:58:03,039 - pyskl - INFO - Epoch [11][300/469]	lr: 1.262e-02, eta: 0:04:27, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0003, loss: 0.0003
+2023-03-18 15:58:07,526 - pyskl - INFO - Epoch [11][350/469]	lr: 1.217e-02, eta: 0:04:21, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0003, loss: 0.0003
+2023-03-18 15:58:12,019 - pyskl - INFO - Epoch [11][400/469]	lr: 1.173e-02, eta: 0:04:16, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0003, loss: 0.0003
+2023-03-18 15:58:16,518 - pyskl - INFO - Epoch [11][450/469]	lr: 1.129e-02, eta: 0:04:10, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:58:18,980 - pyskl - INFO - Saving checkpoint at 11 epochs
+2023-03-18 15:58:33,521 - pyskl - INFO - Epoch [12][50/469]	lr: 1.069e-02, eta: 0:04:06, time: 0.288, data_time: 0.196, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:58:37,896 - pyskl - INFO - Epoch [12][100/469]	lr: 1.026e-02, eta: 0:04:00, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0007, loss: 0.0007
+2023-03-18 15:58:42,322 - pyskl - INFO - Epoch [12][150/469]	lr: 9.842e-03, eta: 0:03:54, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 15:58:46,761 - pyskl - INFO - Epoch [12][200/469]	lr: 9.429e-03, eta: 0:03:49, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:58:51,216 - pyskl - INFO - Epoch [12][250/469]	lr: 9.023e-03, eta: 0:03:43, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:58:55,685 - pyskl - INFO - Epoch [12][300/469]	lr: 8.624e-03, eta: 0:03:37, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:59:00,175 - pyskl - INFO - Epoch [12][350/469]	lr: 8.232e-03, eta: 0:03:32, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0003, loss: 0.0003
+2023-03-18 15:59:04,677 - pyskl - INFO - Epoch [12][400/469]	lr: 7.848e-03, eta: 0:03:26, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:59:09,191 - pyskl - INFO - Epoch [12][450/469]	lr: 7.471e-03, eta: 0:03:20, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:59:11,801 - pyskl - INFO - Saving checkpoint at 12 epochs
+2023-03-18 15:59:26,424 - pyskl - INFO - Epoch [13][50/469]	lr: 6.963e-03, eta: 0:03:15, time: 0.290, data_time: 0.189, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:59:30,799 - pyskl - INFO - Epoch [13][100/469]	lr: 6.605e-03, eta: 0:03:10, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:59:35,217 - pyskl - INFO - Epoch [13][150/469]	lr: 6.255e-03, eta: 0:03:04, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0013, loss: 0.0013
+2023-03-18 15:59:39,655 - pyskl - INFO - Epoch [13][200/469]	lr: 5.913e-03, eta: 0:02:59, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 15:59:44,116 - pyskl - INFO - Epoch [13][250/469]	lr: 5.579e-03, eta: 0:02:53, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:59:48,609 - pyskl - INFO - Epoch [13][300/469]	lr: 5.254e-03, eta: 0:02:47, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 15:59:53,094 - pyskl - INFO - Epoch [13][350/469]	lr: 4.937e-03, eta: 0:02:42, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 15:59:57,584 - pyskl - INFO - Epoch [13][400/469]	lr: 4.629e-03, eta: 0:02:36, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 16:00:02,080 - pyskl - INFO - Epoch [13][450/469]	lr: 4.330e-03, eta: 0:02:31, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 16:00:04,702 - pyskl - INFO - Saving checkpoint at 13 epochs
+2023-03-18 16:00:19,052 - pyskl - INFO - Epoch [14][50/469]	lr: 3.933e-03, eta: 0:02:25, time: 0.284, data_time: 0.181, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 16:00:23,423 - pyskl - INFO - Epoch [14][100/469]	lr: 3.656e-03, eta: 0:02:19, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 16:00:27,843 - pyskl - INFO - Epoch [14][150/469]	lr: 3.388e-03, eta: 0:02:14, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 16:00:32,282 - pyskl - INFO - Epoch [14][200/469]	lr: 3.130e-03, eta: 0:02:08, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 0.9997, top5_acc: 1.0000, loss_cls: 0.0008, loss: 0.0008
+2023-03-18 16:00:36,736 - pyskl - INFO - Epoch [14][250/469]	lr: 2.881e-03, eta: 0:02:03, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0007, loss: 0.0007
+2023-03-18 16:00:41,204 - pyskl - INFO - Epoch [14][300/469]	lr: 2.642e-03, eta: 0:01:57, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 16:00:45,691 - pyskl - INFO - Epoch [14][350/469]	lr: 2.413e-03, eta: 0:01:52, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 16:00:50,199 - pyskl - INFO - Epoch [14][400/469]	lr: 2.193e-03, eta: 0:01:46, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 16:00:54,713 - pyskl - INFO - Epoch [14][450/469]	lr: 1.984e-03, eta: 0:01:41, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0003, loss: 0.0003
+2023-03-18 16:00:57,130 - pyskl - INFO - Saving checkpoint at 14 epochs
+2023-03-18 16:01:11,708 - pyskl - INFO - Epoch [15][50/469]	lr: 1.712e-03, eta: 0:01:35, time: 0.289, data_time: 0.200, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0008, loss: 0.0008
+2023-03-18 16:01:16,077 - pyskl - INFO - Epoch [15][100/469]	lr: 1.526e-03, eta: 0:01:29, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0008, loss: 0.0008
+2023-03-18 16:01:20,499 - pyskl - INFO - Epoch [15][150/469]	lr: 1.352e-03, eta: 0:01:24, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 0.9994, top5_acc: 1.0000, loss_cls: 0.0014, loss: 0.0014
+2023-03-18 16:01:24,927 - pyskl - INFO - Epoch [15][200/469]	lr: 1.187e-03, eta: 0:01:18, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 16:01:29,427 - pyskl - INFO - Epoch [15][250/469]	lr: 1.033e-03, eta: 0:01:13, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0007, loss: 0.0007
+2023-03-18 16:01:33,936 - pyskl - INFO - Epoch [15][300/469]	lr: 8.893e-04, eta: 0:01:07, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 16:01:38,443 - pyskl - INFO - Epoch [15][350/469]	lr: 7.562e-04, eta: 0:01:02, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 16:01:42,942 - pyskl - INFO - Epoch [15][400/469]	lr: 6.338e-04, eta: 0:00:57, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 16:01:47,457 - pyskl - INFO - Epoch [15][450/469]	lr: 5.221e-04, eta: 0:00:51, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 16:01:49,968 - pyskl - INFO - Saving checkpoint at 15 epochs
+2023-03-18 16:02:04,440 - pyskl - INFO - Epoch [16][50/469]	lr: 3.855e-04, eta: 0:00:44, time: 0.287, data_time: 0.200, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 16:02:08,811 - pyskl - INFO - Epoch [16][100/469]	lr: 2.993e-04, eta: 0:00:39, time: 0.087, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0007, loss: 0.0007
+2023-03-18 16:02:13,220 - pyskl - INFO - Epoch [16][150/469]	lr: 2.240e-04, eta: 0:00:34, time: 0.088, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0003, loss: 0.0003
+2023-03-18 16:02:17,662 - pyskl - INFO - Epoch [16][200/469]	lr: 1.595e-04, eta: 0:00:28, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 16:02:22,115 - pyskl - INFO - Epoch [16][250/469]	lr: 1.060e-04, eta: 0:00:23, time: 0.089, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 16:02:26,598 - pyskl - INFO - Epoch [16][300/469]	lr: 6.329e-05, eta: 0:00:18, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 16:02:31,106 - pyskl - INFO - Epoch [16][350/469]	lr: 3.154e-05, eta: 0:00:12, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0004, loss: 0.0004
+2023-03-18 16:02:35,605 - pyskl - INFO - Epoch [16][400/469]	lr: 1.073e-05, eta: 0:00:07, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0006, loss: 0.0006
+2023-03-18 16:02:40,119 - pyskl - INFO - Epoch [16][450/469]	lr: 8.764e-07, eta: 0:00:02, time: 0.090, data_time: 0.001, memory: 2707, top1_acc: 1.0000, top5_acc: 1.0000, loss_cls: 0.0005, loss: 0.0005
+2023-03-18 16:02:42,568 - pyskl - INFO - Saving checkpoint at 16 epochs
