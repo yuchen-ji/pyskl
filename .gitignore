@@ -139,7 +139,7 @@ test.ipynb
 *.zip
 # *.log
 # *.log.json
- !**/all_uncertainty.pkl
- !**/true_uncertainty.pkl
- !**/false_uncertainty.pkl
+!**/all_uncertainty.pkl
+!**/true_uncertainty.pkl
+!**/false_uncertainty.pkl
 examples/extract_diving48_skeleton/*gz
