@@ -62,9 +62,9 @@ LINETYPE = 1
 
 def parse_args():
     parser = argparse.ArgumentParser(description='PoseC3D demo')
-    parser.add_argument('--video', default='workspace/demo/single_action/putdown.mp4', help='video file/url')
+    parser.add_argument('--video', default='workspace/demo/videos/standing_2.mp4', help='video file/url')
     
-    parser.add_argument('--out_filename', default='workspace/report/putdown_result.mp4', help='output filename')
+    parser.add_argument('--out_filename', default='workspace/report/standing_2_result.mp4', help='output filename')
     parser.add_argument(
         '--config',
         # default='configs/posec3d/slowonly_r50_ntu120_xsub/joint.py',
