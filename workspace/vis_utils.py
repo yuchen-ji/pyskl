@@ -80,7 +80,6 @@ def frame_extraction(video_path, short_side):
     return frame_paths, frames
 
 
-
 if __name__ == '__main__':
      
     # fname = 'workspace/data/nuaa5.pkl'
