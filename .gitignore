@@ -132,14 +132,15 @@ dev.ipynb
 test.ipynb
 
 # custom
+*.MOV
 *.jpg
 *.png
 *.mp4
 *.zip
+work_dirs/
 # *.log
 # *.log.json
 !**/all_uncertainty.pkl
 !**/true_uncertainty.pkl
 !**/false_uncertainty.pkl
 examples/extract_diving48_skeleton/*gz
-# work_dirs/

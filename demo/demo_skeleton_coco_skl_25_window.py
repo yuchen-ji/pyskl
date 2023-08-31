@@ -62,19 +62,19 @@ LINETYPE = 1
 
 def parse_args():
     parser = argparse.ArgumentParser(description='PoseC3D demo')
-    parser.add_argument('--video', default='workspace/demo/videos/assemble_placing_1_15fps.mp4', help='video file/url')
+    parser.add_argument('--video', default='workspace/demo/videos/move_15fps.mp4', help='video file/url')
     
-    parser.add_argument('--out_filename', default='workspace/report/assemble_placing_1_15fps_result.mp4', help='output filename')
+    parser.add_argument('--out_filename', default='workspace/report/move_15fps_result.mp4', help='output filename')
     parser.add_argument(
         '--config',
         # default='configs/posec3d/slowonly_r50_ntu120_xsub/joint.py',
-        default='work_dirs/stgcn/stgcn_pyskl_factory/coco/j.py',
+        default='configs/stgcn/stgcn_pyskl_ntu60_xsub_hrnet/j_eds01.py',
         help='skeleton action recognition config file path')
     parser.add_argument(
         '--checkpoint',
         # default=('https://download.openmmlab.com/mmaction/pyskl/ckpt/'
                 #  'posec3d/slowonly_r50_ntu120_xsub/joint.pth'),
-        default='work_dirs/stgcn/stgcn_pyskl_factory/coco/epoch_16.pth',
+        default='work_dirs/stgcn/stgcn_pyskl_eds01/epoch_16.pth',
         help='skeleton action recognition checkpoint file/url')
     parser.add_argument(
         '--det-config',

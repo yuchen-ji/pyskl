@@ -11,6 +11,6 @@ for video_file in "$VIDEO_FOLDER"/*.mp4; do
   filename=$(basename "$video_file" .mp4)
 
   # 使用 Python 执行脚本并修改参数
-  python demo/demo_skeleton_coco_skl.py --video "$video_file" --out_filename "$OUT_FOLDER/${filename}_result.mp4"
+  python demo/demo_skeleton_coco_skl_25_window.py --video "$video_file" --out_filename "$OUT_FOLDER/${filename}_result.mp4"
 
 done

@@ -3,14 +3,14 @@ model = dict(
     backbone=dict(
         type='STGCN',
         graph_cfg=dict(layout='coco', mode='stgcn_spatial')),
-    cls_head=dict(type='GCNHead', num_classes=6, in_channels=256))
+    cls_head=dict(type='GCNHead', num_classes=60, in_channels=256))
 
 dataset_type = 'PoseDataset'
 # ann_file = '/workspaces/pyskl/workspace/data/unseen.pkl'
-# ann_file = '/workspaces/pyskl/workspace/data/ntu60_hrnet.pkl'
+ann_file = '/workspaces/pyskl/workspace/data/ntu60_hrnet.pkl'
 # ann_file = 'workspace/data/ntu60_hrnet_select.pkl'
 # ann_file = 'workspace/data/nuaa6.pkl'
-ann_file = 'workspace/data/factory6_coco.pkl'
+# ann_file = 'workspace/data/factory6_coco.pkl'
 
 train_pipeline = [
     dict(type='PreNormalize2D'),

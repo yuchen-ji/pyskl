@@ -62,21 +62,34 @@ LINETYPE = 1
 
 def parse_args():
     parser = argparse.ArgumentParser(description='PoseC3D demo')
-    # parser.add_argument('--video', default='demo/_8Vy3dlHg2w_00081.mp4', help='video file/url')
-    parser.add_argument('--video', default='workspace/demo/videos/move.mp4', help='video file/url')
+
+    """
+    data_generate/rgb/left_person1_0001_test.mp4
+    data_generate/rgb/left_person1_0004_test.mp4
+    data_generate/rgb/left_person1_0007_test.mp4
+    data_generate/rgb/right_person1_0002_test.mp4
+    data_generate/rgb/right_person1_0005_test.mp4
+    data_generate/rgb/right_person1_0008_test.mp4
+    data_generate/rgb/stand_person1_0000_test.mp4
+    data_generate/rgb/stand_person1_0003_test.mp4
+    data_generate/rgb/stand_person1_0006_test.mp4
+    """
+
+    parser.add_argument('--video', default='data_generate/video__/stand_person1_0126_train.mp4', help='video file/url')
     
-    parser.add_argument('--out_filename', default='workspace/demo/videos/output_result.mp4', help='output filename')
+    parser.add_argument('--out_filename', default='demo/demo.mp4', help='output filename')
     parser.add_argument(
         '--config',
-        # default='configs/posec3d/slowonly_r50_ntu120_xsub/joint.py',
-        default='configs/stgcn/stgcn_pyskl_ntu60_xsub_hrnet/j_custom.py',
+        # default='configs/stgcn/stgcn_pyskl_ntu60_xsub_hrnet/j_custom.py',
+        # default='configs/stgcn/stgcn_pyskl_ntu60_xsub_hrnet/j.py',
+        default='configs/stgcn/stgcn_custom_hrnet/j.py',
         help='skeleton action recognition config file path')
     parser.add_argument(
         '--checkpoint',
-        # default=('https://download.openmmlab.com/mmaction/pyskl/ckpt/'
-                #  'posec3d/slowonly_r50_ntu120_xsub/joint.pth'),
+        # default='checkpoints/j.pth',
         # default='work_dirs/stgcn/stgcn_pyskl_nuaa6/j_4/epoch_16.pth',
-        default='work_dirs/stgcn/stgcn_pyskl_factory/jj/epoch_16.pth',
+        # default='work_dirs/stgcn/stgcn_pyskl_factory/jj/epoch_16.pth',
+        default='work_dirs/stgcn_custom/epoch_30.pth',
         help='skeleton action recognition checkpoint file/url')
     parser.add_argument(
         '--det-config',
@@ -105,10 +118,11 @@ def parse_args():
     parser.add_argument(
         '--label-map',
         # default='tools/data/label_map/nturgbd_120.txt',
-        default='workspace/label_map/nuaa6.txt',
+        default='data_generate/label_map/custom_3.txt',
+        # default='workspace/label_map/nuaa6.txt',
         help='label map file')
     parser.add_argument(
-        '--device', type=str, default='cuda:1', help='CPU/CUDA device option')
+        '--device', type=str, default='cuda:0', help='CPU/CUDA device option')
     parser.add_argument(
         '--short-side',
         type=int,
@@ -274,18 +288,18 @@ def main():
         modality='Pose',
         total_frames=num_frame)
 
+    # 使用GCN model
     if GCN_flag:
         # We will keep at most `GCN_nperson` persons per frame.
         tracking_inputs = [[pose['keypoints'] for pose in poses] for poses in pose_results]
         keypoint, keypoint_score = pose_tracking(tracking_inputs, max_tracks=GCN_nperson)
-        # By Yuchen, 23.03.12, 用于将keypoint_score都设为1
+        fake_anno['keypoint'] = keypoint
+        fake_anno['keypoint_score'] = keypoint_score
+
+        # By Yuchen, 23.03.12, 用于将keypoint_score都设为 1
         # keypoint_score = np.ones_like(keypoint_score)
-        if False:
-            fake_list = slide_window(fake_anno, keypoint, keypoint_score)
-        else:       
-            fake_anno['keypoint'] = keypoint[:,:,:-4,:]
-            # fake_anno['keypoint_score'] = keypoint_score
-            fake_anno['keypoint_score'] = 0.8 * np.ones_like(keypoint_score[:,:,:-4])
+        # fake_anno['keypoint'] = keypoint[:,:,:-4,:]
+        # fake_anno['keypoint_score'] = 0.8 * np.ones_like(keypoint_score[:,:,:-4])
     else:
         num_person = max([len(x) for x in pose_results])
         # Current PoseC3D models are trained on COCO-keypoints (17 keypoints)
@@ -313,6 +327,7 @@ def main():
         vis_pose_result(pose_model, frame_paths[i], pose_results[i])
         for i in range(num_frame)
     ]
+
     for item in range(len(vis_frames)):
         cv2.putText(vis_frames[item], action_label, (10, 20), FONTFACE, FONTSCALE,
                     FONTCOLOR, THICKNESS, LINETYPE)

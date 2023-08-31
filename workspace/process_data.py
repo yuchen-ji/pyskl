@@ -204,12 +204,12 @@ def rescore_keypoints():
     with open('workspace/data/nuaa6_score.pkl', 'wb') as f:
         pk.dump(context, f)
 
-
+# concat eds的数据
 def concat_pkl():
     dataset = {}
     annotations = []
     split = []
-    dirname = 'workspace/data/annotation'
+    dirname = 'workspace/data/eds01/annotation'
     for idx, file in enumerate(os.listdir(dirname)):
         with open(os.path.join(dirname, file), 'rb') as f:
             context = pk.load(f)
@@ -229,16 +229,16 @@ def concat_pkl():
     dataset['split'] = {'xsub_train': split}
     dataset['annotations'] = annotations
     
-    with open(r'workspace/data/factory6_coco.pkl', 'wb') as f:
+    with open(r'workspace/data/eds01.pkl', 'wb') as f:
         pk.dump(dataset, f)
     
 
 if __name__ == '__main__':
     
-    context = read_pickle(filename='workspace/data/factory6_coco.pkl')
+    # context = read_pickle(filename='workspace/data/factory6_coco.pkl')
     # select_classes()
     # rename_label_index()
     # calc_uncertainty()
     # verify_error()
     # rescore_keypoints()
-    # concat_pkl()
+    concat_pkl()
