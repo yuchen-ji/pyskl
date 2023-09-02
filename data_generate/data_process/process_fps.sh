@@ -1,7 +1,7 @@
 #!/bin/bash
 
-src_folder="/workspaces/pyskl/data_generate/videos_"
-dst_folder="/workspaces/pyskl/data_generate/videos__"
+src_folder="/workspaces/pyskl/data_generate/datasets_action_6/videos_"
+dst_folder="/workspaces/pyskl/data_generate/datasets_action_6/videos__"
 target_framerate=15
 
 mkdir -p "$dst_folder"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-src_folder="/workspaces/pyskl/data_generate/videos"
-dst_folder="/workspaces/pyskl/data_generate/videos_"
+src_folder="/workspaces/pyskl/data_generate/datasets_action_6/videos"
+dst_folder="/workspaces/pyskl/data_generate/datasets_action_6/videos_"
 
 mkdir -p "$dst_folder"
 

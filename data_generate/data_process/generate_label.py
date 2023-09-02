@@ -13,6 +13,12 @@ def get_label_num(fname):
         return 1
     if "right" in fname:
         return 2
+    if "polish" in fname:
+        return 3
+    if "assembly" in fname:
+        return 4
+    if "putdown" in fname:
+        return 5
     
 
 def get_video_frame_count(video_path):
@@ -40,9 +46,9 @@ if __name__ == '__main__':
     
     train_label = []
     test_label = []
-    dir_name = "data_generate/videos__"
-    train_fname = "data_generate/train.json"
-    test_fname = "data_generate/test.json"
+    dir_name = "data_generate/datasets_action_6/videos__"
+    train_fname = "data_generate/datasets_action_6/train.json"
+    test_fname = "data_generate/datasets_action_6/test.json"
     
     fnames = os.listdir(dir_name)
     for fname in fnames:

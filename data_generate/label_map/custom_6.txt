@@ -1,0 +1,6 @@
+stand
+left
+right
+polish
+assembly
+putdown

@@ -64,32 +64,43 @@ def parse_args():
     parser = argparse.ArgumentParser(description='PoseC3D demo')
 
     """
-    data_generate/rgb/left_person1_0001_test.mp4
-    data_generate/rgb/left_person1_0004_test.mp4
-    data_generate/rgb/left_person1_0007_test.mp4
-    data_generate/rgb/right_person1_0002_test.mp4
-    data_generate/rgb/right_person1_0005_test.mp4
-    data_generate/rgb/right_person1_0008_test.mp4
-    data_generate/rgb/stand_person1_0000_test.mp4
-    data_generate/rgb/stand_person1_0003_test.mp4
-    data_generate/rgb/stand_person1_0006_test.mp4
+    data_generate/datasets_action_6/videos__/assembly_person1_0004_test.mp4
+    data_generate/datasets_action_6/videos__/assembly_person1_0010_test.mp4
+    data_generate/datasets_action_6/videos__/assembly_person1_0016_test.mp4
+    data_generate/datasets_action_6/videos__/left_person1_0001_test.mp4
+    data_generate/datasets_action_6/videos__/left_person1_0007_test.mp4
+    data_generate/datasets_action_6/videos__/left_person1_0013_test.mp4
+    data_generate/datasets_action_6/videos__/polish_person1_0003_test.mp4
+    data_generate/datasets_action_6/videos__/polish_person1_0009_test.mp4
+    data_generate/datasets_action_6/videos__/polish_person1_0015_test.mp4
+    data_generate/datasets_action_6/videos__/putdown_person1_0005_test.mp4
+    data_generate/datasets_action_6/videos__/putdown_person1_0011_test.mp4
+    data_generate/datasets_action_6/videos__/putdown_person1_0017_test.mp4
+    data_generate/datasets_action_6/videos__/right_person1_0002_test.mp4
+    data_generate/datasets_action_6/videos__/right_person1_0008_test.mp4
+    data_generate/datasets_action_6/videos__/right_person1_0014_test.mp4
+    data_generate/datasets_action_6/videos__/stand_person1_0000_test.mp4
+    data_generate/datasets_action_6/videos__/stand_person1_0006_test.mp4
+    data_generate/datasets_action_6/videos__/stand_person1_0012_test.mp4
     """
 
-    parser.add_argument('--video', default='data_generate/video__/stand_person1_0126_train.mp4', help='video file/url')
+    parser.add_argument('--video', default='data_generate/datasets_action_6/videos__/polish_person1_0009_test.mp4', help='video file/url')
     
     parser.add_argument('--out_filename', default='demo/demo.mp4', help='output filename')
     parser.add_argument(
         '--config',
         # default='configs/stgcn/stgcn_pyskl_ntu60_xsub_hrnet/j_custom.py',
         # default='configs/stgcn/stgcn_pyskl_ntu60_xsub_hrnet/j.py',
-        default='configs/stgcn/stgcn_custom_hrnet/j.py',
+        # default='configs/stgcn/stgcn_custom_hrnet/j.py',
+        default='configs/stgcn/stgcn_custom_hrnet/j_6.py',
         help='skeleton action recognition config file path')
     parser.add_argument(
         '--checkpoint',
         # default='checkpoints/j.pth',
         # default='work_dirs/stgcn/stgcn_pyskl_nuaa6/j_4/epoch_16.pth',
         # default='work_dirs/stgcn/stgcn_pyskl_factory/jj/epoch_16.pth',
-        default='work_dirs/stgcn_custom/epoch_30.pth',
+        # default='work_dirs/stgcn_custom/epoch_30.pth',
+        default='work_dirs/stgcn_custom_6/epoch_20.pth',
         help='skeleton action recognition checkpoint file/url')
     parser.add_argument(
         '--det-config',
@@ -118,7 +129,7 @@ def parse_args():
     parser.add_argument(
         '--label-map',
         # default='tools/data/label_map/nturgbd_120.txt',
-        default='data_generate/label_map/custom_3.txt',
+        default='data_generate/label_map/custom_6.txt',
         # default='workspace/label_map/nuaa6.txt',
         help='label map file')
     parser.add_argument(
