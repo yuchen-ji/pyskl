@@ -74,7 +74,8 @@ def rename_files(file_names, file_path, split, start_idx, end_idx, start):
 
 if __name__ == "__main__":
         
-    file_path = "data_generate/datasets_action_6/videos"
+    # file_path = "data_generate/datasets_action_6/videos"
+    file_path = "data_generate/video_action6_test"
     split = "test"
     
     # start = 0
@@ -95,9 +96,14 @@ if __name__ == "__main__":
     # start_idx = 3449
     # end_idx = 3666
     
+    # start = 0
+    # start_idx = 3667
+    # end_idx = 3685
+    
+    # By yuchen 23.09.13 
     start = 0
-    start_idx = 3667
-    end_idx = 3685    
+    start_idx = 3776
+    end_idx = 3965
     
     sort_names = read_sort_files(file_path)
     rename_files(sort_names, file_path, split, start_idx, end_idx, start)

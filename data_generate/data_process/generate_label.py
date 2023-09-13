@@ -46,9 +46,9 @@ if __name__ == '__main__':
     
     train_label = []
     test_label = []
-    dir_name = "data_generate/datasets_action_6/videos__"
-    train_fname = "data_generate/datasets_action_6/train.json"
-    test_fname = "data_generate/datasets_action_6/test.json"
+    dir_name = "/workspaces/pyskl/data_generate/datasets_action_5_10fps_120test/videos_all"
+    train_fname = "/workspaces/pyskl/data_generate/datasets_action_5_10fps_120test/train.json"
+    test_fname = "/workspaces/pyskl/data_generate/datasets_action_5_10fps_120test/test.json"
     
     fnames = os.listdir(dir_name)
     for fname in fnames:
@@ -71,8 +71,4 @@ if __name__ == '__main__':
     with open(test_fname, 'w') as f:
         json.dump(test_label, f)
         f.write('\n')
-
-    
-        
-    
     

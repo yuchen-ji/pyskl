@@ -5,17 +5,19 @@ import os, sys
 import numpy as np
 
 import seaborn as sns
+import mmcv
 
 sys.path.insert(0, '/workspaces/pyskl/workspace')
 
 def select_kp():
-    with open(r'workspace/ntu60_hrnet.pkl', 'rb') as f:
+    with open(r'data_generate/datasets_action_6/custom_hrnet.pkl', 'rb') as f:
         context = pk.load(f)
         sub_kp = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
         for each in context['annotations']:
             each['keypoint'] = each['keypoint'][...,sub_kp,:]
-            each['keypoint_score'] = each['keypoint_score'][...,sub_kp,:]     
-    with open(r'workspace/diving48_hrnet_sub.pkl', 'wb') as f:
+            each['keypoint_score'] = each['keypoint_score'][...,sub_kp]
+               
+    with open(r'data_generate/datasets_action_6/custom_hrnet_subkp.pkl', 'wb') as f:
         pk.dump(context, f)
     print(context['annotations'][0]['keypoint'].shape)
     
@@ -61,7 +63,7 @@ def select_classes():
 def calc_uncertainty():
     ensemble = []
     for i in range(1, 5, 1):
-        with open(r'workspace/results/real_time/result_{}.pkl'.format(i), 'rb') as f:
+        with open(r'workspace/best_results/result_{}.pkl'.format(i), 'rb') as f:
             context = pk.load(f)
             ensemble.append(context)
     
@@ -104,7 +106,7 @@ def calc_uncertainty():
            }
     
     # sort = np.sort(uncertainty_list, axis=0, kind='mergesort')
-    with open(r'workspace/results/real_time/all_uncertainty.pkl', 'wb') as f:
+    with open(r'workspace/best_results/all_uncertainty.pkl', 'wb') as f:
         pk.dump(exp, f)
     
     print(f"mean: {np.mean(entropy_list)}")
@@ -218,8 +220,8 @@ def concat_pkl():
         scores = context['keypoint_score']
         
         # 忽略后四个关节，这是身体的下半部分
-        # keypoints = keypoints[:, :, :-4, :]
-        # scores = scores[:, :, :-4]
+        keypoints = keypoints[:, :, :-4, :]
+        scores = scores[:, :, :-4]
         
         context['keypoint'] = keypoints
         context['keypoint_score'] = scores   
@@ -235,10 +237,20 @@ def concat_pkl():
 
 if __name__ == '__main__':
     
-    # context = read_pickle(filename='workspace/data/factory6_coco.pkl')
+    # context = read_pickle(filename='workspace/best_results/all_uncertainty.pkl')
     # select_classes()
     # rename_label_index()
     # calc_uncertainty()
     # verify_error()
     # rescore_keypoints()
-    concat_pkl()
+    # concat_pkl()
+    # select_kp()
+    # v = mmcv.VideoReader("workspace/demo/input_15fps.mp4")
+    # print(v.fps)
+    
+    
+    read_pickle('data_generate/datasets_ntu60/ntu60_hrnet.pkl')
+    read_pickle('work_dirs/stgcn_ntu60_coco_1/last_pred.pkl')
+    # ffmpeg -i workspace/demo/input.mp4 -qscale 0 -r 15 -y workspace/demo/input_15fps.mp4
+
+    # for idx, it in enumerate

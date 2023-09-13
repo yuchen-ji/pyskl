@@ -83,7 +83,7 @@ class Graph:
         self.nx_node = nx_node
 
         assert nx_node == 1 or mode == 'random', "nx_node can be > 1 only if mode is 'random'"
-        assert layout in ['openpose', 'nturgb+d', 'coco', 'custom']
+        assert layout in ['openpose', 'nturgb+d', 'coco', 'custom', 'custom2']
 
         self.get_layout(layout)
         self.hop_dis = get_hop_distance(self.num_node, self.inward, max_hop)
@@ -130,6 +130,18 @@ class Graph:
                 (1, 0), (3, 1), (2, 0), (4, 2)
             ]
             self.center = 0
+        elif layout == 'custom2':
+            # [0, 5, 6, 7, 8, 9, 10, 11, 12]
+            # 0:nose, 1:lshoulder, 2:rshoulder, 3:lelbow, 4:relbow, 5:lwrist, 6rwrist, 7:lhip, 8:rhip
+            # 9:neck, 10:midhip
+            self.num_node = 11
+            self.inward = [
+                (0, 9), (9, 1), (9, 2), (9, 10),
+                (1, 3), (3, 5),
+                (2, 4), (4, 6),
+                (10, 8), (10, 7) 
+            ]
+            self.center = 9
         else:
             raise ValueError(f'Do Not Exist This Layout: {layout}')
         self.self_link = [(i, i) for i in range(self.num_node)]

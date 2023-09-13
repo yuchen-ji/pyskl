@@ -62,21 +62,18 @@ LINETYPE = 1
 
 def parse_args():
     parser = argparse.ArgumentParser(description='PoseC3D demo')
-    # parser.add_argument('--video', default='workspace/demo/videos/output.mp4', help='video file/url')
-    parser.add_argument('--video', default='workspace/demo/input.mp4', help='video file/url')
-    
-    parser.add_argument('--out_filename', default='workspace/demo/input_result.mp4', help='output filename')
+    parser.add_argument('--video', default='workspace/demo/stand-polish.mp4', help='video file/url')
+    parser.add_argument('--out_filename', default='workspace/demo/stand-polish_result.mp4', help='output filename')
     parser.add_argument(
         '--config',
-        # default='configs/posec3d/slowonly_r50_ntu120_xsub/joint.py',
-        default='configs/stgcn/stgcn_pyskl_ntu60_xsub_hrnet/j_custom.py',
+        default='configs/stgcn/stgcn_custom_hrnet/j_6_subkp.py',
         help='skeleton action recognition config file path')
     parser.add_argument(
         '--checkpoint',
         # default=('https://download.openmmlab.com/mmaction/pyskl/ckpt/'
                 #  'posec3d/slowonly_r50_ntu120_xsub/joint.pth'),
         # default='work_dirs/stgcn/stgcn_pyskl_nuaa6/j_4/epoch_16.pth',
-        default='work_dirs/stgcn/stgcn_pyskl_factory/jj/epoch_16.pth',
+        default='work_dirs/stgcn_custom_6_subkp_4/epoch_20.pth',
         help='skeleton action recognition checkpoint file/url')
     parser.add_argument(
         '--det-config',
@@ -105,10 +102,10 @@ def parse_args():
     parser.add_argument(
         '--label-map',
         # default='tools/data/label_map/nturgbd_120.txt',
-        default='workspace/label_map/nuaa6.txt',
+        default='data_generate/label_map/custom_6.txt',
         help='label map file')
     parser.add_argument(
-        '--device', type=str, default='cuda:1', help='CPU/CUDA device option')
+        '--device', type=str, default='cuda:0', help='CPU/CUDA device option')
     parser.add_argument(
         '--short-side',
         type=int,
@@ -335,12 +332,11 @@ def main():
    
     label_list[0:0] = [label_list[0] for i in range(num_frame - len(label_list))]
     # 存储实时预测的结果
-    # with open(r'workspace/results/real_time/result_4.pkl', 'wb') as f:
+    # with open(r'workspace/best_results/result_4.pkl', 'wb') as f:
     #     pickle.dump(predictions, f)
-
     # results = inference_recognizer(model, fake_anno)
     # print(results)
-    # action_label = label_map[results[0][0]]
+    action_label = label_map[results[0][0]]
 
     pose_model = init_pose_model(args.pose_config, args.pose_checkpoint, args.device)
     vis_frames = [
@@ -348,11 +344,11 @@ def main():
         # vis_pose_result(pose_model, frame_paths[i], pose_results[i])
         for i in range(num_frame)
     ]
-    for item in range(len(vis_frames)):
-        cv2.putText(vis_frames[item], label_list[item], (150, 67), FONTFACE, FONTSCALE,
-                    FONTCOLOR, THICKNESS, LINETYPE)
+    # for item in range(len(vis_frames)):
+    #     cv2.putText(vis_frames[item], label_list[item], (20, 20), FONTFACE, FONTSCALE,
+    #                 FONTCOLOR, THICKNESS, LINETYPE)
 
-    vid = mpy.ImageSequenceClip([x[:, :, ::-1] for x in vis_frames], fps=30)
+    vid = mpy.ImageSequenceClip([x[:, :, ::-1] for x in vis_frames], fps=25)
     vid.write_videofile(args.out_filename, remove_temp=True)
 
     tmp_frame_dir = osp.dirname(frame_paths[0])
