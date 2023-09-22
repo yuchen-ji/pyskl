@@ -23,14 +23,16 @@ NOTE:
 单个动作的样本总数为: 20*5=100
 """
 
+dirpath = "data_generate/datasets_action_5_10fps_120test"
+videos = "data_generate/datasets_action_5_10fps_120test/videos_all/{}.mp4"
 
 # # Step 1：导入标签文件和视频文件，
-# train = load('data_generate/datasets_action_5_10fps_120test/train.json')
-# test = load('data_generate/datasets_action_5_10fps_120test/test.json')
-# tmpl = 'data_generate/datasets_action_5_10fps_120test/videos_all/{}.mp4'
+# train = load(os.path.join(dirpath, 'train.json'))
+# test = load(os.path.join(dirpath, 'test.json'))
+# tmpl = videos
 
 # lines = [(tmpl + ' {}').format(x['vid_name'], x['label']) for x in train + test]
-# mwlines(lines, 'data_generate/datasets_action_5_10fps_120test/custom.list')
+# mwlines(lines, os.path.join(dirpath, 'custom.list'))
 
 
 # Step 2: 运行关键点检测程序, 生成关键点label
@@ -41,10 +43,10 @@ custom_2d_skeleton.py 依次需要接收3个参数: {GPU_NUM} --video-list {mwli
 # bash tools/dist_run.sh tools/data/custom_2d_skeleton.py 6 --video-list data_generate/datasets_action_5_10fps_120test/custom.list --out data_generate/datasets_action_5_10fps_120test/custom_annos.pkl
 
 # Step 3: 合并训练集和测试集为一个pickle文件
-train = load('data_generate/datasets_action_5_10fps_120test/train.json')
-test = load('data_generate/datasets_action_5_10fps_120test/test.json')
-annotations = load('data_generate/datasets_action_5_10fps_120test/custom_annos.pkl')
+train = load(os.path.join(dirpath, 'train.json'))
+test = load(os.path.join(dirpath, 'test.json'))
+annotations = load(os.path.join(dirpath, 'custom_annos.pkl'))
 split = dict()
 split['train'] = [x['vid_name'] for x in train]
 split['test'] = [x['vid_name'] for x in test]
-dump(dict(split=split, annotations=annotations), 'data_generate/datasets_action_5_10fps_120test/custom_hrnet.pkl')  # 最终的pickle文件，用于训练行为识别模型
+dump(dict(split=split, annotations=annotations), os.path.join(dirpath, 'custom_hrnet.pkl'))  # 最终的pickle文件，用于训练行为识别模型

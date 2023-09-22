@@ -84,7 +84,7 @@ def parse_args():
     data_generate/datasets_action_6/videos__/stand_person1_0012_test.mp4
     """
 
-    parser.add_argument('--video', default='data_generate/datasets_action_6_10fps/videos__/putdown_person1_0017_test.mp4', help='video file/url')
+    parser.add_argument('--video', default='workspace/demo/input.mp4', help='video file/url')
     
     parser.add_argument('--out_filename', default='demo/demo.mp4', help='output filename')
     parser.add_argument(
@@ -355,6 +355,7 @@ def main():
     print(results)
     action_label = label_map[results[0][0]]
     print(f"action: {action_label}")
+    action_label = 'standing'
 
     pose_model = init_pose_model(args.pose_config, args.pose_checkpoint, args.device)
     vis_frames = [

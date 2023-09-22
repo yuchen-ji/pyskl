@@ -23,7 +23,9 @@ def get_pred_uncertainty(results):
     uncertainty = 0
     for pred in results:
         uncertainty += np.sum(pred * (np.log(pred + 1e-20) - np.log(mean + 1e-20)))
-        
+    
+    uncertainty = uncertainty / results.shape[0]
+    
     return mean, uncertainty
     
 

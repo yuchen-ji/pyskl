@@ -2,6 +2,7 @@ import numpy as np
 import pickle as pk
 import os
 import cv2
+import mmcv
 
 def read_pickle(fname):
     with open(fname, 'rb') as f:
@@ -162,15 +163,15 @@ def relabel_file(dirname):
     
 if __name__ == '__main__':
     
-    # fname = 'data_generate/datasets_action_5_10fps_120test/custom_hrnet.pkl'
-    # outfname = 'data_generate/datasets_action_5_10fps_120test/custom_hrnet_11kp.pkl'
-    # context = read_pickle(fname)
-    # datasets = reformat_keypoints(context)
-    # write_pickle(outfname, datasets)
+    fname = 'data_generate/datasets_action_5_10fps_120test/custom_hrnet.pkl'
+    outfname = 'data_generate/datasets_action_5_10fps_120test/custom_hrnet_11kp.pkl'
+    context = read_pickle(fname)
+    datasets = reformat_keypoints(context)
+    write_pickle(outfname, datasets)
     
-    # context = read_pickle('data_generate/datasets_action_5_10fps_120test/custom_hrnet_11kp.pkl')
-    # datasets = update_confidence(context)
-    # write_pickle('data_generate/datasets_action_5_10fps_120test/custom_hrnet_11kp_1conf.pkl', context)
+    context = read_pickle('data_generate/datasets_action_5_10fps_120test/custom_hrnet_11kp.pkl')
+    datasets = update_confidence(context)
+    write_pickle('data_generate/datasets_action_5_10fps_120test/custom_hrnet_11kp_1conf.pkl', context)
     
     
     # read_pickle('result.pkl')
@@ -198,6 +199,49 @@ if __name__ == '__main__':
     # print(len(os.listdir("data_generate/datasets_action_5_10fps_120test/videos_all")))
     # print(len(os.listdir("data_generate/datasets_action_5_10fps_120test/videos_test_update")))
     
+    
+    # print(len(os.listdir("data_generate/datasets_action_5_10fps_120test/videos_all")))
+    
+    
+    
+    # 用73，90 替换 83，85
+    # right_person1_0073_test
+    # right_person1_0090_test
+    
+    # right_person1_0083_test
+    # right_person1_0085_test
+    
+    # with open('data_generate/datasets_action_5_10fps_120test_old/custom_annos.pkl', 'rb') as f:
+    #     src = pk.load(f)
+    
+    # with open('data_generate/datasets_action_5_10fps_120test/custom_annos.pkl', 'rb') as f:
+    #     dst = pk.load(f)
+      
+    # for idx, s in enumerate(src):
+    #     if s['frame_dir'] == "right_person1_0073_test":
+    #         select = s
+    #         break     
+    # for idx, d in enumerate(dst):
+    #     if d['frame_dir'] == "right_person1_0083_test":
+    #         select['frame_dir'] = d['frame_dir']
+    #         dst[idx] = select
+    #         break
+        
+    
+    # for idx, s in enumerate(src):
+    #     if s['frame_dir'] == "right_person1_0090_test":
+    #         select = s
+    #         break
+    # for idx, d in enumerate(dst):
+    #     if d['frame_dir'] == "right_person1_0085_test":
+    #         print(select['frame_dir'])
+    #         select['frame_dir'] = d['frame_dir']
+    #         dst[idx] = select
+    #         print(dst[idx]['frame_dir'])
+    #         break
+        
+    # with open('data_generate/datasets_action_5_10fps_120test/custom_annos_.pkl', 'wb') as f:
+    #     pk.dump(dst, f)
     
     
     

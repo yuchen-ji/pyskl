@@ -86,16 +86,16 @@ def parse_args():
     data_generate/datasets_action_6/videos__/stand_person1_0012_test.mp4
     """
 
-    parser.add_argument('--video', default='demo/long-horizon_10fps.mp4', help='video file/url')
+    parser.add_argument('--video', default='demo/videos/long_view2.mp4', help='video file/url')
     
-    parser.add_argument('--out_filename', default='demo/demo_uncertainty.mp4', help='output filename')
+    parser.add_argument('--out_filename', default='demo/results/long_view2_result.mp4', help='output filename')
     parser.add_argument(
         '--config',
         # default='configs/stgcn/stgcn_pyskl_ntu60_xsub_hrnet/j_custom.py',
         # default='configs/stgcn/stgcn_pyskl_ntu60_xsub_hrnet/j.py',
         # default='configs/stgcn/stgcn_custom_hrnet/j.py',
         # default='configs/stgcn/stgcn_custom_hrnet/j_6.py',
-        default='configs/stgcn/stgcn_custom_hrnet/j_6_custom2.py',
+        default='configs/stgcn/stgcn_custom_hrnet/j_5_custom2_1conf.py',
         help='skeleton action recognition config file path')
     parser.add_argument(
         '--checkpoint',
@@ -281,12 +281,11 @@ def main():
         format_op = [op for op in config.data.test.pipeline if op['type'] == 'FormatGCNInput'][0]
         GCN_nperson = format_op['num_person']
 
-    # model = init_recognizer(config, args.checkpoint, args.device)
-    num_model = 4
+    model_idx = [2, 3, 4, 5]
     model_list = []
-    for idx in range(num_model):
+    for idx in model_idx:
         device = f"cuda:{idx}"
-        checkpoint = f"work_dirs/stgcn_custom_6_custom2_{idx+1}/epoch_20.pth"
+        checkpoint = f"work_dirs/stgcn_custom_5_custom2_1conf_{idx}/epoch_30.pth"
         model = init_recognizer(config, checkpoint, device)
         model_list.append(model)
 
@@ -340,6 +339,8 @@ def main():
             (keypoint_score, neck_score[..., np.newaxis], midhip_score[..., np.newaxis]),
             axis=2
         )
+        # 将骨骼点的score置为1
+        keypoint_score = np.ones_like(keypoint_score)
         
         start_frame = 20
         fake_list = slide_window(fake_anno, keypoint, keypoint_score, start_frame)
@@ -361,6 +362,7 @@ def main():
         fake_anno['keypoint_score'] = keypoint_score
 
     # 实时推理
+    action_list = []
     label_list = []
     uncertainties = []
     predictions = []
@@ -382,29 +384,31 @@ def main():
         pred, uncertainty = get_pred_uncertainty(results)
 
         action = label_map[np.argmax(pred)]
+        action_list.append(action)
         label_list.append(f"{action}: {round(uncertainty, 5)}")
         
         predictions.append(np.max(pred))
         uncertainties.append(uncertainty)
         
-        
+    # 预测的实时的不确定度写入pkl文件
     info = {}
-    predictions[0:0] = [predictions[0] for i in range(num_frame - len(predictions))]
-    uncertainties[0:0] = [uncertainties[0] for i in range(num_frame - len(uncertainties))]
+    action_list[0:0] = [action_list[0]] * (num_frame - len(action_list))
+    predictions[0:0] = [predictions[0]] * (num_frame - len(predictions))
+    uncertainties[0:0] = [uncertainties[0]] * (num_frame - len(uncertainties))
+    info['action'] = action_list
     info['predictions'] = predictions
     info['uncertainties'] = uncertainties
-    with open('demo/results/demo_uncertainty.pkl', 'wb') as f:
+    with open('demo/results/long_view2_uncertainty.pkl', 'wb') as f:
         pickle.dump(info, f)
-        
-                
+         
     # 前xx帧的识别结果为第一次检测的类别
-    label_list[0:0] = [label_list[0] for i in range(num_frame - len(label_list))]
+    label_list[0:0] = [label_list[0]] * (num_frame - len(label_list))
     
     # 骨骼及动作标签可视化
     pose_model = init_pose_model(args.pose_config, args.pose_checkpoint, args.device)
     vis_frames = [
-        # vis_pose_result(pose_model, frame_paths[i], pose_results[i], dataset='CustomDataset')
-        vis_pose_result(pose_model, frame_paths[i], pose_results[i])
+        vis_pose_result(pose_model, frame_paths[i], pose_results[i], dataset='CustomDataset')
+        # vis_pose_result(pose_model, frame_paths[i], pose_results[i])
         for i in range(num_frame)
     ]
     for item in range(num_frame):
@@ -412,10 +416,14 @@ def main():
         # 更新label的颜色  
         label = label_list[item]
         uncer = float(label[label.index(':')+1:])
-        if uncer <= 0.5:
+        if uncer <= 0.2:
             FONTCOLOR = (228, 28, 33)
         else:
             FONTCOLOR = (33, 28, 228)
+            
+        # 添加是第几帧
+        frame = f"Frame: {item}"
+        label_list[item] = label + frame
                 
         cv2.putText(vis_frames[item], label_list[item], (20, 20), FONTFACE, FONTSCALE,
                     FONTCOLOR, THICKNESS, LINETYPE)

@@ -61,11 +61,11 @@ def frame_extraction(video_path, short_side):
     while flag:
         if new_h is None:
             h, w, _ = frame.shape
-            new_w, new_h = mmcv.rescale_size((w, h), (short_side, np.Inf))
+            # new_w, new_h = mmcv.rescale_size((w, h), (short_side, np.Inf))
 
-        frame = mmcv.imresize(frame, (new_w, new_h))
+        # frame = mmcv.imresize(frame, (new_w, new_h))
         # 这个size是用来crop input_video
-        frame = mmcv.imcrop(frame, np.array([140, 40, 440+140, 440+40]))
+        # frame = mmcv.imcrop(frame, np.array([140, 40, 440+140, 440+40]))
         # 这个size用于crop rviz_video
         # frame = mmcv.imcrop(frame, np.array([390, 80, 385+390, 385+80]))
 
@@ -90,5 +90,6 @@ if __name__ == '__main__':
     
     # vname = 'workspace/demo/rviz_1.mp4'
     vname = 'workspace/demo/input_result.mp4'
+    vname = 'workspace/demo/final_3.mp4'
     frame_extraction(vname, 480)
     
