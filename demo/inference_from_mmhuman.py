@@ -61,15 +61,25 @@ def frame_extraction(video_path, short_side):
 if __name__ == '__main__':
 
 
-    fname = 'data_generate/data_from_mmhuman/inference_result.npz'
-    vname = 'demo/long-horizon_10fps.mp4'
-    # cname = 'configs/stgcn/stgcn_custom_hrnet/j_6_custom2.py'
-    cname = 'configs/stgcn/stgcn_custom_hrnet/j_6_custom2_1conf.py'
-    # checkpoint = 'work_dirs/stgcn_custom_6_custom2_1/epoch_20.pth'
-    checkpoint = 'work_dirs/stgcn_custom_6_custom2_1conf/epoch_20.pth'
+
+
+    fname = 'data_generate/data_from_mmhuman/exp_result.npz'
+    vname = 'workspace/demo/input.mp4'
+    cname = 'configs/stgcn/stgcn_custom_hrnet/j_5_custom2_1conf.py'
+    checkpoint = 'work_dirs/stgcn_custom_5_custom2_1conf_1/epoch_30.pth'
     lname = 'data_generate/label_map/custom_6.txt'
-    oname = 'demo/demo_mmhuman.mp4'
+    oname = 'demo/exp_mmhuman.mp4'
     device = 'cuda:0'
+
+    # fname = 'data_generate/data_from_mmhuman/inference_result.npz'
+    # vname = 'demo/long-horizon_10fps.mp4'
+    # cname = 'configs/stgcn/stgcn_custom_hrnet/j_6_custom2.py'
+    # cname = 'configs/stgcn/stgcn_custom_hrnet/j_6_custom2_1conf.py'
+    # checkpoint = 'work_dirs/stgcn_custom_6_custom2_1/epoch_20.pth'
+    # checkpoint = 'work_dirs/stgcn_custom_6_custom2_1conf/epoch_20.pth'
+    # lname = 'data_generate/label_map/custom_6.txt'
+    # oname = 'demo/demo_mmhuman.mp4'
+    # device = 'cuda:0'
 
 
     # 加载mmhuman推理的2d关键点
